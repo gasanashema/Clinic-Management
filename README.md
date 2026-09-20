@@ -33,7 +33,7 @@ Key domain rules:
 - **Appointment**: Represents a consultation between a patient and a doctor, including a date, reason, and status (`AppointmentStatus`).
 - **Office**: Represents a physical room assigned exclusively to one doctor.
 - **Specialization**: Represents a field of medical practice (e.g., Cardiology, Pediatrics).
-- **DoctorSpecialization**: Represents the junction entity managing the many-to-many relationship between doctors and specializations using a composite primary key.
+- **DoctorSpecialization**: Represents the junction entity managing the many-to-many relationship between doctors and specializations with a UUID primary key and explicit associations.
 
 ## Entity Relationships
 
@@ -49,38 +49,39 @@ Key domain rules:
 ### Modeling Rationale
 
 - **Appointment as an Entity**: An appointment contains distinct attributes beyond the patient and doctor references, such as appointment date, reason, and status (`AppointmentStatus`). Modeling it as an explicit entity allows for state tracking and independent query capability.
-- **Explicit DoctorSpecialization Entity**: Instead of using a direct `@ManyToMany` annotation, `DoctorSpecialization` is explicitly defined to promote the junction table to an entity using `@EmbeddedId` and `@MapsId`. This follows clean domain modeling practices and permits adding extra attributes to the relationship in the future.
+- **Explicit DoctorSpecialization Entity**: Instead of using a direct `@ManyToMany` annotation, `DoctorSpecialization` is explicitly defined to promote the junction table to an entity with a UUID primary key and `@ManyToOne` associations. This follows clean domain modeling practices without requiring custom composite ID classes.
 
 ## Database Structure
 
 The project relies on Hibernate schema generation (`spring.jpa.hibernate.ddl-auto=update`) to generate database tables:
 
 - **clinic**
-  - `id` (PK)
+  - `id` (PK, UUID)
   - `name`
 - **doctor**
-  - `id` (PK)
+  - `id` (PK, UUID)
   - `name`, `email`, `phone`
   - `clinic_id` (FK referencing `clinic.id`)
 - **patient**
-  - `id` (PK)
+  - `id` (PK, UUID)
   - `name`, `email`, `phone`
   - `clinic_id` (FK referencing `clinic.id`)
 - **appointment**
-  - `id` (PK)
+  - `id` (PK, UUID)
   - `date`, `reason`, `status`
   - `patient_id` (FK referencing `patient.id`)
   - `doctor_id` (FK referencing `doctor.id`)
 - **office**
-  - `id` (PK)
+  - `id` (PK, UUID)
   - `room_number`
   - `doctor_id` (FK referencing `doctor.id`, UNIQUE)
 - **specialization**
-  - `id` (PK)
+  - `id` (PK, UUID)
   - `name`
 - **doctor_specialization**
-  - `doctor_id` (PK, FK referencing `doctor.id`)
-  - `specialization_id` (PK, FK referencing `specialization.id`)
+  - `id` (PK, UUID)
+  - `doctor_id` (FK referencing `doctor.id`)
+  - `specialization_id` (FK referencing `specialization.id`)
 
 ## Project Structure
 
@@ -99,7 +100,6 @@ src/
     │                       ├── Clinic.java
     │                       ├── Doctor.java
     │                       ├── DoctorSpecialization.java
-    │                       ├── DoctorSpecializationId.java
     │                       ├── Office.java
     │                       ├── Patient.java
     │                       └── Specialization.java

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "doctor_specialization")
 @Getter
@@ -14,25 +16,20 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DoctorSpecialization {
 
-    @EmbeddedId
-    private DoctorSpecializationId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne
-    @MapsId("doctorId")
-    @JoinColumn(name = "doctor_id")
+    @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
     @ManyToOne
-    @MapsId("specializationId")
-    @JoinColumn(name = "specialization_id")
+    @JoinColumn(name = "specialization_id", nullable = false)
     private Specialization specialization;
 
     public DoctorSpecialization(Doctor doctor, Specialization specialization) {
         this.doctor = doctor;
         this.specialization = specialization;
-        this.id = new DoctorSpecializationId(
-            doctor != null ? doctor.getId() : null,
-            specialization != null ? specialization.getId() : null
-        );
     }
 }
